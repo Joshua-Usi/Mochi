@@ -1,4 +1,9 @@
-# Mochi
+<p align="center">
+<img width="256" height="256" src="./Mochi.png">
+</p>
+
+# Mochi 
+
  A C++ header-only testing library with similiar syntax to Mocha.js
 ```C++
 Mochi::Suite example("Mochi tests", [&](Mochi::Suite* suite) {
