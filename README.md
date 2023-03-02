@@ -120,18 +120,18 @@ Test Execution Time: X.XXXXXs
   ```C++
  // Returns true if either the preceeding or succeedin statement is true, or even both!
  // Assert that 5 is less than or equal to 7
- Mochi::Assert::That(5).Is.LessThan(7).Or().EqualTo();
+ Mochi::Assert::That(5).Is.LessThan(7).Or().EqualTo(7);
  ```
  ### Getting the value out of assertions
  To get the value of an assertion, call ```AssertsTrue();``` at the end of the assert chain
    ```C++
  // Returns true if either the preceeding or succeedin statement is true, or even both!
  // Assert that 5 is less than or equal to 7
- Mochi::Assert::That(5).Is.LessThan(7).Or().EqualTo().AssertsTrue() // Returns true;
+ Mochi::Assert::That(5).Is.LessThan(7).Or().EqualTo(7).AssertsTrue() // Returns true;
  ```
  Asserts can be chained as long as you want. However it is very cumbersome and usually not required
  ```C++
- // Assert that 7 is not equal to 5 or les than 9 and greater than 2 and not equal to 3 asserts true
+ // Assert that 7 is not equal to 5 or less than 9 and greater than 2 and not equal to 3 asserts true
  // AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
  return Mochi::Assert::That(7).Is.Not().EqualTo(5).Or().LessThan(9).And().GreaterThan(2).And().Not().EqualTo(3).AssertsTrue();
  ```
