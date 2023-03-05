@@ -5,6 +5,8 @@
 #include <cstring>
 #include <vector>
 
+#include <assert.h>
+
 namespace Mochi
 {
 	namespace Logic
@@ -25,7 +27,7 @@ namespace Mochi
 		class Gate
 		{
 		private:
-			std::vector<Gate*> inputs;
+			std::vector<std::shared_ptr<Gate>> inputs;
 			Operator operation;
 		public:
 			/// <summary>
@@ -43,9 +45,20 @@ namespace Mochi
 			/// </summary>
 			/// <param name="inputNumber">The index of the input to set</param>
 			/// <param name="state">The new state of the gate using the Gate* singleton instance</param>
+			void SetInput(unsigned int inputNumber, std::shared_ptr<Gate> state)
+			{
+				if (inputNumber < inputs.size())
+				{
+					inputs[inputNumber] = state;
+				}
+				else
+				{
+					throw "inputNumber out of range";
+				}
+			}
 			void SetInput(unsigned int inputNumber, Gate* state)
 			{
-				inputs[inputNumber] = state;
+				this->SetInput(inputNumber, std::shared_ptr<Gate>(state));
 			}
 			/// <summary>
 			/// Set the input of a gate to a boolean value. Useful for using true booleans rather than the emulated gates
@@ -54,7 +67,7 @@ namespace Mochi
 			/// <param name="state">The new state of the gate using the Gate* singleton instance</param>
 			void SetInputBool(unsigned int inputNumber, bool state)
 			{
-				Gate* constant = new Gate((state) ? Operator::ConstantTrue : Operator::ConstantFalse);
+				std::shared_ptr<Gate> constant = std::make_shared<Gate>((state) ? Operator::ConstantTrue : Operator::ConstantFalse);
 				inputs[inputNumber] = constant;
 			}
 			/// <summary>
@@ -85,6 +98,8 @@ namespace Mochi
 				case Operator::ConstantFalse: return false;
 				case Operator::Or:
 				{
+					// 0 input gates should fail
+					assert(inputs.size() > 0);
 					bool result = inputs[0]->Output();
 					for (int i = 1; i < inputs.size(); i++)
 					{
@@ -94,14 +109,23 @@ namespace Mochi
 				};
 				case Operator::And:
 				{
+					// 0 input gates should fail
+					assert(inputs.size() > 0);
 					bool result = inputs[0]->Output();
 					for (int i = 1; i < inputs.size(); i++)
-					{
+					{	
 						result &= inputs[i]->Output();
 					}
 					return result;
 				};
-				case Operator::Not: return !inputs[0]->Output();
+				case Operator::Not:
+				{
+					// 0 input gates should fail
+					assert(inputs.size() > 0);
+					return !inputs[0]->Output();
+				}
+				default:
+					throw "Invalid Gate type";
 				}
 			}
 		};
@@ -113,28 +137,25 @@ namespace Mochi
 		{
 		private:
 			// One input AND gates act like repeaters, propagating signals through
-			Logic::Gate* satisfaction = new Logic::Gate(Logic::Operator::And, 1);
+			std::shared_ptr<Logic::Gate> satisfaction;
 			type state;
 			int chainSize;
 		public:
 			That& Is = *this;
 			That(type value)
 			{
+				satisfaction.reset(new Logic::Gate(Logic::Operator::And, 1));
 				state = value;
 				chainSize = 0;
-			}
-			~That()
-			{
-				delete satisfaction;
 			}
 			/// <summary>
 			/// Logical NOT gate that inverts the next operation to return the opposite boolean value
 			/// </summary>
 			That& Not()
 			{
-				Logic::Gate* inverter = new Logic::Gate(Logic::Operator::Not, 1);
-				inverter->SetInput(chainSize, satisfaction);
-				satisfaction = inverter;
+				std::shared_ptr<Logic::Gate> s = satisfaction;
+				satisfaction = std::make_shared<Logic::Gate>(Logic::Operator::Not, 1);
+				satisfaction->SetInput(0, s);
 				return *this;
 			}
 			/// <summary>
