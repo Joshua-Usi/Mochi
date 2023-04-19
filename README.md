@@ -125,7 +125,7 @@ Test Execution Time: X.XXXXXs
  ### Getting the value out of assertions
  To get the value of an assertion, call ```AssertsTrue();``` at the end of the assert chain
    ```C++
- // Returns true if either the preceeding or succeedin statement is true, or even both!
+ // Returns true if either the preceeding or succeeding statement is true, or even both!
  // Assert that 5 is less than or equal to 7
  Mochi::Assert::That(5).Is.LessThan(7).Or().EqualTo(7).AssertsTrue() // Returns true;
  ```
